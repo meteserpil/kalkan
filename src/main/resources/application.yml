@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+spring:
+  codec:
+    max-in-memory-size: 10MB
+
+kalkan:
+  # OpenAI uyumlu herhangi bir sağlayıcı: OpenAI, OpenRouter, Ollama (http://localhost:11434/v1) ...
+  upstream-url: ${KALKAN_UPSTREAM_URL:https://api.openai.com/v1}
