@@ -1,5 +1,6 @@
 # Kalkan: KVKK Uyumlu LLM Gateway
 ![CI](https://github.com/meteserpil/kalkan/actions/workflows/ci.yml/badge.svg)
+
 Şirket uygulamaları ile LLM sağlayıcıları (OpenAI, OpenRouter, Ollama…) arasına giren bir proxy.
 Prompt'taki Türkçe kişisel verileri **LLM'e gitmeden** maskeler, cevapta geri çevirir.
 İstemci tarafında tek değişiklik `base_url`.
@@ -55,10 +56,20 @@ curl http://localhost:8080/v1/chat/completions \
   -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"TC kimliğim 10000000146, bunu tekrar et"}]}'
 ```
 
+## Gözlemlenebilirlik
+
+| Endpoint | İçerik |
+|---|---|
+| `/actuator/health` | Sağlık kontrolü (load balancer, Kubernetes probe) |
+| `/actuator/prometheus` | `kalkan_pii_masked_total{type="TCKN"}` gibi tür bazında maskeleme sayaçları, gelen istekler (`http_server_requests`) ve LLM'e giden çağrıların gecikmesi (`http_client_requests`) |
+
+Metriklerde sadece sayılar tutulur, ham kişisel veri hiçbir zaman metriklere ya da loglara yazılmaz.
+
 ## Yol haritası
 
 - [x] Kural tabanlı tespit, maskeleme, streaming geri çevirme
 - [ ] BERTurk NER servisi ile isim, adres ve kurum tespiti (Python, ONNX, gRPC)
 - [ ] Tenant bazlı politika: maskele / engelle / izin ver
-- [ ] Async audit log (ham veri yerine hash) ve Prometheus metrikleri
+- [x] Prometheus metrikleri ve health endpoint
+- [ ] Async audit log (ham veri yerine hash)
 - [ ] Sentetik Türkçe PII eval seti, CI'da recall kapısı, k6 ile gecikme ölçümü
