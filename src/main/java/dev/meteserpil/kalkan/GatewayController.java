@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,10 +35,13 @@ public class GatewayController {
 
     private final WebClient upstream;
     private final ObjectMapper json;
+    private final MeterRegistry metrics;
 
-    GatewayController(WebClient.Builder builder, ObjectMapper json, @Value("${kalkan.upstream-url}") String upstreamUrl) {
+    GatewayController(WebClient.Builder builder, ObjectMapper json, MeterRegistry metrics,
+                      @Value("${kalkan.upstream-url}") String upstreamUrl) {
         this.upstream = builder.baseUrl(upstreamUrl).build();
         this.json = json;
+        this.metrics = metrics;
     }
 
     @PostMapping("/v1/chat/completions")
@@ -46,6 +50,7 @@ public class GatewayController {
         Masker masker = new Masker();
         maskAllText(body.path("messages"), masker);
         log.info("masked: {}", masker.summary());
+        masker.counts().forEach((type, n) -> metrics.counter("kalkan.pii.masked", "type", type.name()).increment(n));
 
         WebClient.RequestBodySpec request = upstream.post().uri("/chat/completions").contentType(MediaType.APPLICATION_JSON);
         if (auth != null) request.header(HttpHeaders.AUTHORIZATION, auth);

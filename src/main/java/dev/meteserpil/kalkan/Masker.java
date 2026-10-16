@@ -32,6 +32,11 @@ public final class Masker {
         return out.append(text, pos, text.length()).toString();
     }
 
+    /** Tür başına maskelenen farklı değer sayısı. */
+    public Map<PiiDetector.Type, Integer> counts() {
+        return Map.copyOf(counts);
+    }
+
     /** "TCKN=1,KART=2" gibi; ham veri içermez, log ve header için güvenli. */
     public String summary() {
         StringBuilder s = new StringBuilder();

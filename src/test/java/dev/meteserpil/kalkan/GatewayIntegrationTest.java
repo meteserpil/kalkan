@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -22,6 +23,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** Sahte bir LLM sağlayıcısı son kullanıcı mesajını geri yankılar; LLM'e ham verinin hiç ulaşmadığını doğrularız. */
+@AutoConfigureObservability
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GatewayIntegrationTest {
 
@@ -79,6 +81,11 @@ class GatewayIntegrationTest {
 
         assertThat(receivedByLlm).doesNotContain("10000000146", "4111").contains("[TCKN_1]", "[KART_1]");
         assertThat(JSON.readTree(resp).at("/choices/0/message/content").asText()).isEqualTo(SECRET);
+
+        String metrics = client.get().uri("/actuator/prometheus").exchange().expectStatus().isOk()
+                .expectBody(String.class).returnResult().getResponseBody();
+        assertThat(metrics).contains("kalkan_pii_masked_total{type=\"TCKN\"}", "kalkan_pii_masked_total{type=\"KART\"}")
+                .doesNotContain("10000000146");
     }
 
     @Test
