@@ -1,5 +1,5 @@
 # Kalkan: KVKK Uyumlu LLM Gateway
-
+![CI](https://github.com/meteserpil/kalkan/actions/workflows/ci.yml/badge.svg)
 Şirket uygulamaları ile LLM sağlayıcıları (OpenAI, OpenRouter, Ollama…) arasına giren bir proxy.
 Prompt'taki Türkçe kişisel verileri **LLM'e gitmeden** maskeler, cevapta geri çevirir.
 İstemci tarafında tek değişiklik `base_url`.
